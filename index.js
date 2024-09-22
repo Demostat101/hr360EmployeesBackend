@@ -14,6 +14,9 @@ app.use(bodyParser.json());
 app.use(cors({origin:"*", optionsSuccessStatus:200}));
 app.use("/", routes);
 app.use(express.urlencoded({extended:false}))
+app.use("/files",express.static("files"))
+app.use(express.json());
+
 
 
 // route

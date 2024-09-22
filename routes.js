@@ -1,7 +1,9 @@
 const express = require("express");
 const User = require("./user");
 const router = express.Router();
-const cloudinary = require("./utils/cloudinary");
+const {upload} = require("./utils/multer")
+// const multer = require("multer");
+// const upload = multer({dest:"./files"})
 // const upload = require("./utils/multer");
 
 //  insert image
@@ -11,66 +13,88 @@ const cloudinary = require("./utils/cloudinary");
 //     try {
 //         res.json(result)
 //     } catch (error) {
-//         console.log(error);
+//         console.log(error)
 //     }
 // })
 
 // insert a user into database route
 // const result = await cloudinary.uploader.upload(req.file.path);
 
-router.post('/employee', async (req, res) => {
-    try {
-        const newUser = new User({
-            firstName: req.body.firstName,
-            lastName: req.body.lastName,
-            middleName: req.body.middleName,
-            email: req.body.email,
-            phoneNo: req.body.phoneNo,
-            gender: req.body.gender,
-            address: req.body.address,
-            dateOfBirth: req.body.dateOfBirth,
-            maritalStatus: req.body.maritalStatus,
-            religion: req.body.religion,
-            educationalQualification: req.body.educationalQualification,
-            nationality: req.body.nationality,
-            languageSpoken: req.body.languageSpoken,
-            document: req.body.document,
-            emergencyContact: {
-                name: req.body.emergencyContact.name,
-                phoneNo: req.body.emergencyContact.phoneNo,
-                relationship: req.body.emergencyContact.relationship,
-                address: req.body.emergencyContact.address,
-            },
-            officialDetails: {
-                employeeId: req.body.officialDetails.employeeId,
-                jobTitle: req.body.officialDetails.jobTitle,
-                department: req.body.officialDetails.department,
-                email: req.body.officialDetails.email,
-                phoneNo: req.body.officialDetails.phoneNo,
-                reportingOfficer: req.body.officialDetails.reportingOfficer,
-                workSchedule: req.body.officialDetails.workSchedule,
-                employmentType: req.body.officialDetails.employmentType,
-                region: req.body.officialDetails.region,
-                basicSalary: req.body.officialDetails.basicSalary,
-                startingDate: req.body.officialDetails.startingDate,
-                contractEndDate: req.body.officialDetails.contractEndDate,
-                skills: req.body.officialDetails.skills,
-            },
-            bankDetails: {
-                bankName: req.body.bankDetails.bankName,
-                accountNumber: req.body.bankDetails.accountNumber,
-                accountHolderName: req.body.bankDetails.accountHolderName,
-                bicCode: req.body.bankDetails.bicCode,
-            },
-        });
+router.post('/employee', upload.single("file"), async (req, res) => {
+  try {
+      // Destructure nested properties with default values
+      const {
+          firstName,
+          lastName,
+          middleName,
+          email,
+          phoneNo,
+          gender,
+          address,
+          dateOfBirth,
+          maritalStatus,
+          religion,
+          educationalQualification,
+          nationality,
+          languageSpoken,
+          emergencyContact = {},
+          officialDetails = {},
+          bankDetails = {}
+      } = req.body;
 
-        await newUser.save();
-        res.status(200).json(newUser);
-    } catch (error) {
-        console.error("Error saving user:", error);
-        res.status(400).json({ error: error.message });
-    }
+      const newUser = new User({
+          firstName,
+          lastName,
+          middleName,
+          email,
+          phoneNo,
+          gender,
+          address,
+          dateOfBirth,
+          maritalStatus,
+          religion,
+          educationalQualification,
+          nationality,
+          languageSpoken,
+          document: req.file,
+          emergencyContact: {
+              name: emergencyContact.name || '',
+              phoneNo: emergencyContact.phoneNo || '',
+              relationship: emergencyContact.relationship || '',
+              address: emergencyContact.address || '',
+          },
+          officialDetails: {
+              employeeId: officialDetails.employeeId || '',
+              jobTitle: officialDetails.jobTitle || '',
+              department: officialDetails.department || '',
+              email: officialDetails.email || '',
+              phoneNo: officialDetails.phoneNo || '',
+              reportingOfficer: officialDetails.reportingOfficer || '',
+              workSchedule: officialDetails.workSchedule || '',
+              employmentType: officialDetails.employmentType || '',
+              region: officialDetails.region || '',
+              basicSalary: officialDetails.basicSalary || 0,
+              startingDate: officialDetails.startingDate || '',
+              contractEndDate: officialDetails.contractEndDate || '',
+              skills: officialDetails.skills || [],
+          },
+          bankDetails: {
+              bankName: bankDetails.bankName || '',
+              accountNumber: bankDetails.accountNumber || '',
+              accountHolderName: bankDetails.accountHolderName || '',
+              bicCode: bankDetails.bicCode || '',
+          },
+      });
+
+      await newUser.save();
+      res.status(200).json(newUser);
+  } catch (error) {
+      console.error("Error saving user:", error);
+      console.error("Request Body:", req.body); // Log the request body for debugging
+      res.status(400).json({ error: error.message });
+  }
 });
+
 
 
 // get all users
