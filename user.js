@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema({
         basicSalary: Number,
         startingDate: Date,
         contractEndDate: Date,
-        skills: String,
+        skills: [String],
     },
     bankDetails: {
         bankName: String,

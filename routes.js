@@ -56,7 +56,8 @@ router.post('/employee', upload.single("file"), async (req, res) => {
           educationalQualification,
           nationality,
           languageSpoken,
-          document: req.file,
+          document: req.file ? req.file.path : '',
+
           emergencyContact: {
               name: emergencyContact.name || '',
               phoneNo: emergencyContact.phoneNo || '',
