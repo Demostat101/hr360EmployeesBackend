@@ -99,7 +99,7 @@ router.get("/employees", async (req, res) => {
   }
 });
 
-// search by Name
+// search by first name, region, employee id
 router.get("/employees/:firstName", async (req, res) => {
   const firstname = req.params.firstName;
   console.log(firstname);
