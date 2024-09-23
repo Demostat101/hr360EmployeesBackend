@@ -6,7 +6,10 @@ const userSchema = new mongoose.Schema({
     lastName: { type: String },
     gender: { type: String },
     email: { type: String },
-    phoneNo: { type: String },
+    phoneNo: { 
+        code:String,
+        phone:String
+     },
     address: { type: String },
     dateOfBirth: { type: Date },
     maritalStatus: { type: String },
@@ -18,7 +21,10 @@ const userSchema = new mongoose.Schema({
     
     emergencyContact: {
         name: String,
-        phoneNo: String,
+        phoneNo: { 
+            code:String,
+            phone:String
+         },
         relationship: String,
         address: String,
     },
@@ -27,7 +33,10 @@ const userSchema = new mongoose.Schema({
         jobTitle: String,
         department: String,
         email: String,
-        phoneNo: String,
+        phoneNo: { 
+            code:String,
+            phone:String
+         },
         reportingOfficer: String,
         workSchedule: String,
         employmentType: String,

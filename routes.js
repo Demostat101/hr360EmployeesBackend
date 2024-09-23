@@ -3,87 +3,203 @@ const User = require("./user");
 const router = express.Router();
 const {upload} = require("./utils/multer")
 
+
+
 router.post('/employee', upload.single("file"), async (req, res) => {
-
   try {
-      // Destructure nested properties with default values
-      const {
-          firstName,
-          lastName,
-          middleName,
-          email,
-          phoneNo,
-          gender,
-          address,
-          dateOfBirth,
-          maritalStatus,
-          religion,
-          educationalQualification,
-          nationality,
-          languageSpoken,
-          emergencyContact = {},
-          officialDetails = {},
-          bankDetails = {}
-      } = req.body;
+    // Destructure and set default values
+    const {
+      firstName,
+      middleName,
+      lastName,
+      email,
+      gender,
+      address,
+      dateOfBirth,
+      maritalStatus,
+      religion,
+      educationalQualification,
+      nationality,
+      languageSpoken,
+      phoneNo = { code: '', phone: '' },
+      emergencyContact = {
+        name: '',
+        phoneNo: { code: '', phone: '' },
+        relationship: '',
+        address: '',
+      },
+      officialDetails = {
+        employeeId: '',
+        jobTitle: '',
+        department: '',
+        email: '',
+        phoneNo: { code: '', phone: '' }, // Ensure phoneNo is an object
+        reportingOfficer: '',
+        workSchedule: '',
+        employmentType: '',
+        region: '',
+        basicSalary: 0,
+        startingDate: null,
+        contractEndDate: null,
+        skills: [],
+      },
+      bankDetails = {
+        bankName: '',
+        accountNumber: '',
+        accountHolderName: '',
+        bicCode: '',
+      },
+    } = req.body;
 
+    const newUser = new User({
+      firstName,
+      middleName,
+      lastName,
+      email,
+      gender,
+      address,
+      dateOfBirth,
+      maritalStatus,
+      religion,
+      educationalQualification,
+      nationality,
+      languageSpoken,
+      phoneNo: {
+        code: phoneNo.code,
+        phone: phoneNo.phone,
+      },
+      document: req.file ? req.file.path : '', // File path
 
-      const newUser = new User({
-          firstName,
-          lastName,
-          middleName,
-          email,
-          phoneNo,
-          gender,
-          address,
-          dateOfBirth,
-          maritalStatus,
-          religion,
-          educationalQualification,
-          nationality,
-          languageSpoken,
-          document: req.file ? req.file.path : '',
+      emergencyContact: {
+        name: emergencyContact.name,
+        phoneNo: {
+          code: emergencyContact.phoneNo.code,
+          phone: emergencyContact.phoneNo.phone,
+        },
+        relationship: emergencyContact.relationship,
+        address: emergencyContact.address,
+      },
+      officialDetails: {
+        employeeId: officialDetails.employeeId,
+        jobTitle: officialDetails.jobTitle,
+        department: officialDetails.department,
+        email: officialDetails.email,
+        phoneNo: {
+          code: officialDetails.phoneNo.code,
+          phone: officialDetails.phoneNo.phone,
+        },
+        reportingOfficer: officialDetails.reportingOfficer,
+        workSchedule: officialDetails.workSchedule,
+        employmentType: officialDetails.employmentType,
+        region: officialDetails.region,
+        basicSalary: officialDetails.basicSalary,
+        startingDate: officialDetails.startingDate,
+        contractEndDate: officialDetails.contractEndDate,
+        skills: officialDetails.skills,
+      },
+      bankDetails: {
+        bankName: bankDetails.bankName,
+        accountNumber: bankDetails.accountNumber,
+        accountHolderName: bankDetails.accountHolderName,
+        bicCode: bankDetails.bicCode,
+      },
+      created: new Date(), // Set created date
+    });
 
-          emergencyContact: {
-              name: emergencyContact.name || '',
-              phoneNo: emergencyContact.phoneNo || '',
-              relationship: emergencyContact.relationship || '',
-              address: emergencyContact.address || '',
-          },
-          officialDetails: {
-              employeeId: officialDetails.employeeId || '',
-              jobTitle: officialDetails.jobTitle || '',
-              department: officialDetails.department || '',
-              email: officialDetails.email || '',
-              phoneNo: officialDetails.phoneNo || '',
-              reportingOfficer: officialDetails.reportingOfficer || '',
-              workSchedule: officialDetails.workSchedule || '',
-              employmentType: officialDetails.employmentType || '',
-              region: officialDetails.region || '',
-              basicSalary: officialDetails.basicSalary || 0,
-              startingDate: officialDetails.startingDate || '',
-              contractEndDate: officialDetails.contractEndDate || '',
-              skills: officialDetails.skills || [],
-          },
-          bankDetails: {
-              bankName: bankDetails.bankName || '',
-              accountNumber: bankDetails.accountNumber || '',
-              accountHolderName: bankDetails.accountHolderName || '',
-              bicCode: bankDetails.bicCode || '',
-          },
-      });
-      
-      
-      await newUser.save();
-      res.status(200).json({ message: 'User created successfully!' });
+    await newUser.save();
+    res.status(200).json({ message: 'User created successfully!' });
   } catch (error) {
     if (error instanceof multer.MulterError) {
-      // Handle multer-specific errors
       return res.status(400).json({ error: error.message });
-  }
+    }
     console.error("Error saving user:", error);
     res.status(400).json({ error: error.message });
-}
+  }
 });
+
+
+
+// router.post('/employee', upload.single("file"), async (req, res) => {
+
+//   try {
+//       // Destructure nested properties with default values
+//       const {
+//           firstName,
+//           lastName,
+//           middleName,
+//           email,
+//           phoneNo,
+//           gender,
+//           address,
+//           dateOfBirth,
+//           maritalStatus,
+//           religion,
+//           educationalQualification,
+//           nationality,
+//           languageSpoken,
+//           emergencyContact = {},
+//           officialDetails = {},
+//           bankDetails = {}
+//       } = req.body;
+
+
+//       const newUser = new User({
+//           firstName,
+//           lastName,
+//           middleName,
+//           email,
+//           phoneNo,
+//           gender,
+//           address,
+//           dateOfBirth,
+//           maritalStatus,
+//           religion,
+//           educationalQualification,
+//           nationality,
+//           languageSpoken,
+//           document: req.file ? req.file.path : '',
+
+//           emergencyContact: {
+//               name: emergencyContact.name || '',
+//               phoneNo: emergencyContact.phoneNo || '',
+//               relationship: emergencyContact.relationship || '',
+//               address: emergencyContact.address || '',
+//           },
+//           officialDetails: {
+//               employeeId: officialDetails.employeeId || '',
+//               jobTitle: officialDetails.jobTitle || '',
+//               department: officialDetails.department || '',
+//               email: officialDetails.email || '',
+//               phoneNo: officialDetails.phoneNo || '',
+//               reportingOfficer: officialDetails.reportingOfficer || '',
+//               workSchedule: officialDetails.workSchedule || '',
+//               employmentType: officialDetails.employmentType || '',
+//               region: officialDetails.region || '',
+//               basicSalary: officialDetails.basicSalary || 0,
+//               startingDate: officialDetails.startingDate || '',
+//               contractEndDate: officialDetails.contractEndDate || '',
+//               skills: officialDetails.skills || [],
+//           },
+//           bankDetails: {
+//               bankName: bankDetails.bankName || '',
+//               accountNumber: bankDetails.accountNumber || '',
+//               accountHolderName: bankDetails.accountHolderName || '',
+//               bicCode: bankDetails.bicCode || '',
+//           },
+//       });
+      
+      
+//       await newUser.save();
+//       res.status(200).json({ message: 'User created successfully!' });
+//   } catch (error) {
+//     if (error instanceof multer.MulterError) {
+//       // Handle multer-specific errors
+//       return res.status(400).json({ error: error.message });
+//   }
+//     console.error("Error saving user:", error);
+//     res.status(400).json({ error: error.message });
+// }
+// });
 
 
 
