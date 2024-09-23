@@ -2,25 +2,9 @@ const express = require("express");
 const User = require("./user");
 const router = express.Router();
 const {upload} = require("./utils/multer")
-// const multer = require("multer");
-// const upload = multer({dest:"./files"})
-// const upload = require("./utils/multer");
-
-//  insert image
-
-// router.post("/", upload.single("image"), async(req, res)=>{
-//     const result = await cloudinary.uploader.upload(req.file.path);
-//     try {
-//         res.json(result)
-//     } catch (error) {
-//         console.log(error)
-//     }
-// })
-
-// insert a user into database route
-// const result = await cloudinary.uploader.upload(req.file.path);
 
 router.post('/employee', upload.single("file"), async (req, res) => {
+
   try {
       // Destructure nested properties with default values
       const {
@@ -41,6 +25,7 @@ router.post('/employee', upload.single("file"), async (req, res) => {
           officialDetails = {},
           bankDetails = {}
       } = req.body;
+
 
       const newUser = new User({
           firstName,
@@ -86,14 +71,18 @@ router.post('/employee', upload.single("file"), async (req, res) => {
               bicCode: bankDetails.bicCode || '',
           },
       });
-
+      
+      
       await newUser.save();
-      res.status(200).json(newUser);
+      res.status(200).json({ message: 'User created successfully!' });
   } catch (error) {
-      console.error("Error saving user:", error);
-      console.error("Request Body:", req.body); // Log the request body for debugging
-      res.status(400).json({ error: error.message });
+    if (error instanceof multer.MulterError) {
+      // Handle multer-specific errors
+      return res.status(400).json({ error: error.message });
   }
+    console.error("Error saving user:", error);
+    res.status(400).json({ error: error.message });
+}
 });
 
 
@@ -118,8 +107,8 @@ router.get("/employees/:firstName", async (req, res) => {
     const users = await User.find({
       $or: [
         { firstName: { $regex: firstname, $options: "i" } },
-        { lastName: { $regex: firstname, $options: "i" } },
-        { employeeId: { $regex: firstname, $options: "i" } },
+        { "officialDetails.region": { $regex: firstname, $options: "i" } },
+        { "officialDetails.employeeId": { $regex: firstname, $options: "i" } },
       ],
     });
 
@@ -132,88 +121,130 @@ router.get("/employees/:firstName", async (req, res) => {
 
 // update a user
 
-router.put("/users/:id", async (req, res) => {
+router.patch("/employee/:id", async (req, res) => {
   const { id } = req.params;
-  const {
-    first_name,
-    last_name,
-    middle_name,
-    email,
-    phone_no,
-    image,
-    gender,
-    employee_id,
-    employment_type,
-    address,
-    Address,
-    date_of_birth,
-    marital_status,
-    region,
-    religion,
-    educational_qualification,
-    nationality,
-    language_spoken,
-    job_title,
-    department,
-    reporting_officer,
-    work_schedule,
-    bank_name,
-    account_holder_name,
-    account_number,
-  } = req.body;
+  const updateFields = {};
+
+  // Check for emergency contact fields
+  if (req.body.emergencyContact) {
+      if (req.body.emergencyContact.name) {
+          updateFields['emergencyContact.name'] = req.body.emergencyContact.name; // Use dot notation
+      }
+      if (req.body.emergencyContact.phoneNo) {
+          updateFields['emergencyContact.phoneNo'] = req.body.emergencyContact.phoneNo;
+      }
+      if (req.body.emergencyContact.relationship) {
+          updateFields['emergencyContact.relationship'] = req.body.emergencyContact.relationship;
+      }
+      if (req.body.emergencyContact.address) {
+          updateFields['emergencyContact.address'] = req.body.emergencyContact.address;
+      }
+  }
+
+  // Check for official details fields
+  if (req.body.officialDetails) {
+      if (req.body.officialDetails.employeeId) {
+          updateFields['officialDetails.employeeId'] = req.body.officialDetails.employeeId;
+      }
+      if (req.body.officialDetails.employmentType) {
+          updateFields['officialDetails.employmentType'] = req.body.officialDetails.employmentType;
+      }
+      if (req.body.officialDetails.jobTitle) {
+          updateFields['officialDetails.jobTitle'] = req.body.officialDetails.jobTitle;
+      }
+      if (req.body.officialDetails.reportingOfficer) {
+          updateFields['officialDetails.reportingOfficer'] = req.body.officialDetails.reportingOfficer;
+      }
+      if (req.body.officialDetails.workSchedule) {
+          updateFields['officialDetails.workSchedule'] = req.body.officialDetails.workSchedule;
+      }
+      if (req.body.officialDetails.basicSalary) {
+          updateFields['officialDetails.basicSalary'] = req.body.officialDetails.basicSalary;
+      }
+      if (req.body.officialDetails.startingDate) {
+          updateFields['officialDetails.startingDate'] = req.body.officialDetails.startingDate;
+      }
+      if (req.body.officialDetails.contractEndDate) {
+          updateFields['officialDetails.contractEndDate'] = req.body.officialDetails.contractEndDate;
+      }
+      if (req.body.officialDetails.skills) {
+          updateFields['officialDetails.skills'] = req.body.officialDetails.skills;
+      }
+  }
+
+  // Check for bank details fields
+  if (req.body.bankDetails) {
+      if (req.body.bankDetails.bankName) {
+          updateFields['bankDetails.bankName'] = req.body.bankDetails.bankName;
+      }
+      if (req.body.bankDetails.accountHolderName) {
+          updateFields['bankDetails.accountHolderName'] = req.body.bankDetails.accountHolderName;
+      }
+      if (req.body.bankDetails.accountNumber) {
+          updateFields['bankDetails.accountNumber'] = req.body.bankDetails.accountNumber;
+      }
+      if (req.body.bankDetails.bicCode) {
+          updateFields['bankDetails.bicCode'] = req.body.bankDetails.bicCode;
+      }
+  }
+
+  // Check and add fields to updateFields if they exist in the request body
+  if (req.body.firstName) updateFields.firstName = req.body.firstName;
+  if (req.body.lastName) updateFields.lastName = req.body.lastName;
+  if (req.body.middleName) updateFields.middleName = req.body.middleName;
+  if (req.body.email) updateFields.email = req.body.email;
+  if (req.body.phoneNo) updateFields.phoneNo = req.body.phoneNo;
+  if (req.body.gender) updateFields.gender = req.body.gender;
+  if (req.body.address) updateFields.address = req.body.address;
+  if (req.body.dateOfBirth) updateFields.dateOfBirth = req.body.dateOfBirth;
+  if (req.body.maritalStatus) updateFields.maritalStatus = req.body.maritalStatus;
+  if (req.body.region) updateFields.region = req.body.region;
+  if (req.body.religion) updateFields.religion = req.body.religion;
+  if (req.body.educationalQualification) updateFields.educationalQualification = req.body.educationalQualification;
+  if (req.body.nationality) updateFields.nationality = req.body.nationality;
+  if (req.body.languageSpoken) updateFields.languageSpoken = req.body.languageSpoken;
 
   try {
-    const user = await User.findByIdAndUpdate(
-      id,
-      {
-        first_name,
-        last_name,
-        middle_name,
-        phone_no,
-        email,
-        phone,
-        image,
-        gender,
-        employee_id,
-        employment_type,
-        address,
-        Address,
-        date_of_birth,
-        marital_status,
-        region,
-        religion,
-        educational_qualification,
-        nationality,
-        language_spoken,
-        job_title,
-        department,
-        reporting_officer,
-        work_schedule,
-        bank_name,
-        account_holder_name,
-        account_number,
-      },
-      { new: true }
-    );
-    res.send(user);
+      const user = await User.findByIdAndUpdate(
+          id,
+          { $set: updateFields }, // Use $set to apply only the specified updates
+          { new: true, runValidators: true }
+      );
+
+      if (!user) {
+          return res.status(404).json({ message: "User not found" });
+      }
+
+      res.json(user);
+      
   } catch (error) {
-    console.error(error);
-    res.status(500).send(error);
+      console.error(error);
+      res.status(500).send("An error occurred while updating the user.");
   }
 });
 
 // delete a user
 
-router.delete("/users/:id", async (req, res) => {
+router.delete("/employee/:id", async (req, res) => {
   const { id } = req.params;
+
+  // Validate ObjectId
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).send({ message: "Invalid user ID" });
+  }
+
   try {
     const user = await User.findByIdAndDelete(id);
-    await cloudinary.uploader.destroy(user.cloudinary_id);
-    res.send(user);
+    if (!user) {
+      return res.status(404).send({ message: "User not found" });
+    }
+    res.send({ message: "User deleted successfully" });
   } catch (error) {
     console.error(error);
-    res.status(500).send(error);
+    res.status(500).send({ message: "Internal server error", error });
   }
 });
+
+
 
 module.exports = router;
