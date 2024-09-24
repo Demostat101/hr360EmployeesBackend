@@ -22,13 +22,14 @@ const storage = multer.diskStorage({
         cb(null, './files');
     },
     filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now()
         let ext = path.extname(file.originalname);
                 if (ext !== ".pdf"){
                    return cb (new Error("File type is not supported"));
                     
                 
                 }
-        cb(null, file.originalname);
+        cb(null, uniqueSuffix + file.originalname);
     },
 });
 
