@@ -52,6 +52,11 @@ const userSchema = new mongoose.Schema({
     accountHolderName: String,
     bicCode: String,
   },
+  cloudinary_id: {
+    type:String,
+    required:false
+    
+},
   created: { type: Date, required: true, default: Date.now },
 });
 

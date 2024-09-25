@@ -4,9 +4,12 @@ const fs = require("fs");
 const express = require("express");
 const app = express();
 
+
 // Increase limits
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
+
+// const storage = multer.diskStorage({});
 
 // Ensure the directory exists
 const dir = "./files";
@@ -16,17 +19,18 @@ if (!fs.existsSync(dir)) {
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "./files");
+    cb(null, './files'); // Ensure destination is set
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now();
     let ext = path.extname(file.originalname);
-    if (ext !== ".pdf") {
-      return cb(new Error("File type is not supported"));
+    if (ext !== '.pdf') {
+      return cb(new Error('File type is not supported'));
     }
-    cb(null, uniqueSuffix + file.originalname);
+    // You can modify the filename here if needed
+    cb(null, Date.now() + ext); // Example: use a timestamp as the filename
   },
 });
+
 
 app.use((err, req, res, next) => {
   if (err instanceof multer.MulterError) {

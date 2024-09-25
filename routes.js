@@ -2,8 +2,25 @@ const express = require("express");
 const User = require("./user");
 const router = express.Router();
 const { upload } = require("./utils/multer");
+const cloudinary = require("./utils/cloudinary");
 
-router.post("/employee", upload.single("file"), async (req, res) => {
+
+ // Upload PDF to Cloudinary
+ router.post("/", upload.single("pdf"), async(req, res)=>{
+
+  const result = await cloudinary.uploader.upload(req.file.path);
+  try {
+      res.json(result)
+  } catch (error) {
+    console.log(error);
+    
+    return res.status(500).send({ message: 'Upload failed', error });
+  }
+})
+ 
+
+router.post("/employee", upload.single("pdf"), async (req, res) => {
+  const result = await cloudinary.uploader.upload(req.file.path);
   try {
     // Destructure and set default values
     const {
@@ -66,7 +83,8 @@ router.post("/employee", upload.single("file"), async (req, res) => {
         code: phoneNo.code,
         phone: phoneNo.phone,
       },
-      document: req.file ? req.file.path : "", // File path
+      document: result.secure_url, // File path
+      cloudinary_id:result.public_id,
 
       emergencyContact: {
         name: emergencyContact.name,
@@ -306,6 +324,7 @@ router.delete("/employee/:id", async (req, res) => {
 
   try {
     const user = await User.findByIdAndDelete(id);
+    await cloudinary.uploader.destroy(user.cloudinary_id);
     if (!user) {
       return res.status(404).send({ message: "User not found" });
     }
