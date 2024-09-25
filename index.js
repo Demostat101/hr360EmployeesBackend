@@ -24,6 +24,9 @@ const corsOptions = {
   },
 };
 
+app.options('/employee', cors(corsOptions)); // Enable preflight for this route
+
+
 app.use(cors(corsOptions));
 
 // app.use(cors({ origin: "*", optionsSuccessStatus: 200 }));
