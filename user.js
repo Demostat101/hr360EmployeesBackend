@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
   middleName: { type: String },
   lastName: { type: String },
   gender: { type: String },
-  gender: { type: Boolean,default:true },
+  active: { type: Boolean,default:true },
   email: { type: String },
   phoneNo: {
     code: String,
@@ -42,6 +42,7 @@ const userSchema = new mongoose.Schema({
     workSchedule: String,
     employmentType: String,
     region: String,
+    role: String,
     basicSalary: Number,
     startingDate: Date,
     contractEndDate: Date,
