@@ -53,6 +53,7 @@ router.post("/employee", upload.single("pdf"), async (req, res) => {
         workSchedule: "",
         employmentType: "",
         region: "",
+        role: "",
         basicSalary: 0,
         startingDate: null,
         contractEndDate: null,
@@ -108,6 +109,7 @@ router.post("/employee", upload.single("pdf"), async (req, res) => {
         workSchedule: officialDetails.workSchedule,
         employmentType: officialDetails.employmentType,
         region: officialDetails.region,
+        region: officialDetails.role,
         basicSalary: officialDetails.basicSalary,
         startingDate: officialDetails.startingDate,
         contractEndDate: officialDetails.contractEndDate,
@@ -237,6 +239,9 @@ router.patch("/employee/:id", async (req, res) => {
     }
     if (req.body.officialDetails.region) {
       updateFields["officialDetails.region"] = req.body.officialDetails.region;
+    }
+    if (req.body.officialDetails.role) {
+      updateFields["officialDetails.role"] = req.body.officialDetails.role;
     }
     if (req.body.officialDetails.basicSalary) {
       updateFields["officialDetails.basicSalary"] =
