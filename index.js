@@ -7,47 +7,34 @@ const cors = require("cors");
 const PORT = process.env.PORT || 3500;
 const app = express();
 
-// const allowedOrigins = [
-//   'http://localhost:5173',
-//   'https://hr360dashboard-omikunle-ademola.netlify.app'
-// ];
-
-// const corsOptions = {
-//   origin: (origin, callback) => {
-//     // Allow requests with no origin (like mobile apps or curl requests)
-//     if (!origin) return callback(null, true);
-
-//     if (allowedOrigins.indexOf(origin) === -1) {
-//       const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
-//       return callback(new Error(msg), false);
-//     }
-//     return callback(null, true);
-//   },
-// };
-
-// const corsOptions = {
-//   origin: (origin, callback) => {
-//     // Allow requests with no origin (like mobile apps or curl requests)
-//     if (!origin) return callback(null, true);
-
-//     if (allowedOrigins.indexOf(origin) === -1) {
-//       const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
-//       return callback(new Error(msg), false);
-//     }
-//     return callback(null, true);
-//   },
-//   methods: 'POST, GET, OPTIONS', // Allowed methods
-//   allowedHeaders: ['Content-Type'], // Allowed headers
-//   credentials: true, // If you need to include credentials (like cookies)
-// };
-
-// // Use CORS middleware
-// app.use(cors(corsOptions));
 
 
-// app.options('/employee', cors(corsOptions)); // Enable preflight for this route
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://hr360dashboard-omikunle-ademola.netlify.app'
+];
+const corsOptions = {
+  origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, Postman)
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+          callback(null, true);
+      } else {
+          callback(new Error('Not allowed by CORS'));
+      }
+  },
+  methods: ['GET', 'POST', 'OPTIONS'], // Allowed methods
+  allowedHeaders: ['Content-Type'], // Allowed headers
+  credentials: true, // If you need to include credentials
+};
 
-app.use(cors({ origin: "*", optionsSuccessStatus: 200 }));
+// Use CORS middleware
+app.use(cors(corsOptions));
+
+// Handle OPTIONS method for preflight requests
+app.options('*', cors(corsOptions)); // Enable preflight across all routes
+
+
+// app.use(cors({ origin: "*", optionsSuccessStatus: 200 }));
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 app.use(bodyParser.json());
