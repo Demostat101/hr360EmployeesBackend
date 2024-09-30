@@ -11,7 +11,7 @@ const app = express();
 
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://hr360dashboard-omikunle-ademola.netlify.app'
+  'https://hr360dashboard-omikunle-ademola.netlify.app',
 ];
 const corsOptions = {
   origin: function (origin, callback) {
@@ -39,7 +39,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 app.use(bodyParser.json());
 app.use((req, res, next) => {
-  console.log("Request Size:", JSON.stringify(req.body).length);
+  // console.log("Request Size:", JSON.stringify(req.body).length);
   next();
 });
 

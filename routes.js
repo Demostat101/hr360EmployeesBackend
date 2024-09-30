@@ -3,26 +3,23 @@ const User = require("./user");
 const router = express.Router();
 const { upload } = require("./utils/multer");
 const cloudinary = require("./utils/cloudinary");
+const multer = require("multer")
 
 
  // Upload PDF to Cloudinary
- router.post("/", upload.single("pdf"), async(req, res)=>{
-
-  const result = await cloudinary.uploader.upload(req.file.path);
+ router.post("/employee", upload.single("pdf"), async (req, res) => {
   try {
-      res.json(result)
-  } catch (error) {
-    console.log(error);
+    // Check if the user already exists
+    const existingUser = await User.findOne({ email: req.body.email });
+    if (existingUser) {
+      return res.status(400).json({ error: `User with this email: ${req.body.email} already exists.` });
+      
+    }
+
+    // Upload the PDF to Cloudinary
+    const result = await cloudinary.uploader.upload(req.file.path);
     
-    return res.status(500).send({ message: 'Upload failed', error });
-  }
-})
- 
-
-router.post("/employee", upload.single("pdf"), async (req, res) => {
-  const result = await cloudinary.uploader.upload(req.file.path);
-  try {
-    // Destructure and set default values
+    // Destructure and set default values from request body
     const {
       firstName,
       middleName,
@@ -48,7 +45,7 @@ router.post("/employee", upload.single("pdf"), async (req, res) => {
         jobTitle: "",
         department: "",
         email: "",
-        phoneNo: { code: "", phone: "" }, // Ensure phoneNo is an object
+        phoneNo: { code: "", phone: "" },
         reportingOfficer: "",
         workSchedule: "",
         employmentType: "",
@@ -67,6 +64,7 @@ router.post("/employee", upload.single("pdf"), async (req, res) => {
       },
     } = req.body;
 
+    // Create a new user instance
     const newUser = new User({
       firstName,
       middleName,
@@ -85,7 +83,7 @@ router.post("/employee", upload.single("pdf"), async (req, res) => {
         phone: phoneNo.phone,
       },
       document: result.secure_url, // File path
-      cloudinary_id:result.public_id,
+      cloudinary_id: result.public_id,
 
       emergencyContact: {
         name: emergencyContact.name,
@@ -124,14 +122,17 @@ router.post("/employee", upload.single("pdf"), async (req, res) => {
       created: new Date(), // Set created date
     });
 
+    // Save the new user to the database
     await newUser.save();
     res.status(200).json({ message: "User created successfully!" });
   } catch (error) {
     if (error instanceof multer.MulterError) {
-      return res.status(400).json({ error: error.message });
+      return res.status(400).json({ error: req.body.email });
+    } else if (error.code === 11000) { // Handle duplicate key error
+      return res.status(400).json({ error: `User with this email:${req.body.email} already exists.` });
     }
     console.error("Error saving user:", error);
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: "An internal error occurred." });
   }
 });
 
