@@ -12,22 +12,40 @@ const allowedOrigins = [
   'https://hr360dashboard-omikunle-ademola.netlify.app'
 ];
 
+// const corsOptions = {
+//   origin: (origin, callback) => {
+//     // Allow requests with no origin (like mobile apps or curl requests)
+//     if (!origin) return callback(null, true);
+
+//     if (allowedOrigins.indexOf(origin) === -1) {
+//       const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
+//       return callback(new Error(msg), false);
+//     }
+//     return callback(null, true);
+//   },
+// };
+
 const corsOptions = {
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
+
     if (allowedOrigins.indexOf(origin) === -1) {
       const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
       return callback(new Error(msg), false);
     }
     return callback(null, true);
   },
+  methods: 'POST, GET, OPTIONS', // Allowed methods
+  allowedHeaders: ['Content-Type'], // Allowed headers
+  credentials: true, // If you need to include credentials (like cookies)
 };
 
-app.options('/employee', cors(corsOptions)); // Enable preflight for this route
-
-
+// Use CORS middleware
 app.use(cors(corsOptions));
+
+
+app.options('/employee', cors(corsOptions)); // Enable preflight for this route
 
 // app.use(cors({ origin: "*", optionsSuccessStatus: 200 }));
 app.use(express.json({ limit: "10mb" }));
